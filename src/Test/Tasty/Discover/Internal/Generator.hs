@@ -40,10 +40,10 @@ mkTest = Test . replacePathSepTo '.' . dropExtension
 
 -- | The generator type.
 data Generator = Generator
-  { generatorPrefix   :: String          -- ^ Generator prefix.
-  , generatorImports  :: [String]        -- ^ Module import path.
-  , generatorClass    :: String          -- ^ Generator class.
-  , generatorSetup    :: Test -> String  -- ^ Generator setup.
+  { generatorPrefix  :: String          -- ^ Generator prefix.
+  , generatorImports :: [String]        -- ^ Module import path.
+  , generatorClass   :: String          -- ^ Generator class.
+  , generatorSetup   :: Test -> String  -- ^ Generator setup.
   }
 
 -- | Module import qualifier.
@@ -139,15 +139,9 @@ hspecTestCaseGenerator = Generator
 tastyTestGroupGenerator :: Generator
 tastyTestGroupGenerator = Generator
   { generatorPrefix   = "test_"
-  , generatorImports  = []
-  , generatorClass    = concat
-    [ "class TestGroup a where testGroup :: String -> a -> IO T.TestTree\n"
-    , "instance TestGroup T.TestTree        where testGroup _ a = pure a\n"
-    , "instance TestGroup [T.TestTree]      where testGroup n a = pure $ T.testGroup n a\n"
-    , "instance TestGroup (IO T.TestTree)   where testGroup _ a = a\n"
-    , "instance TestGroup (IO [T.TestTree]) where testGroup n a = T.testGroup n <$> a\n"
-    ]
-  , generatorSetup  = \t -> "testGroup \"" ++ name t ++ "\" " ++ qualifyFunction t
+  , generatorImports  = ["import qualified Test.Tasty.Discover as TD"]
+  , generatorClass    = ""
+  , generatorSetup  = \t -> "TD.testGroup \"" ++ name t ++ "\" " ++ qualifyFunction t
   }
 
 -- | Tasty group generator prefix.
